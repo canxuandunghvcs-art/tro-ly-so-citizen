@@ -1,4 +1,4 @@
-"""Cổng công dân – Giao diện Dark Mode, Chuẩn Font, Xem trước Office/PDF."""
+"""Cổng công dân – Giao diện Dark Mode, Chuẩn Font, Bố cục hoàn thiện."""
 import os
 import tempfile
 import streamlit as st
@@ -11,7 +11,7 @@ from utils.i18n import t, render_language_selector
 
 st.set_page_config(page_title="Citizen Portal", page_icon="🛡️", layout="wide")
 
-# 1. ẨN SIDEBAR (Dành riêng cho trang người dân)
+# 1. ẨN SIDEBAR
 st.markdown("""
 <style>
     [data-testid="stSidebar"] { display: none !important; }
@@ -21,58 +21,64 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 2. CSS GIAO DIỆN (ĐÃ TỐI ƯU THEO YÊU CẦU)
+# 2. CSS GIAO DIỆN (ĐÃ FIX LỖI TRÀN KHUNG & RỚT DÒNG)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    
+    /* Nền tối */
     [data-testid="stAppViewContainer"] {
         background-color: #0f172a;
         background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
         font-family: 'Inter', sans-serif;
     }
-    
-    .block-container { max-width: 950px !important; padding-top: 2rem !important; padding-bottom: 2rem !important; }
+    .block-container { max-width: 900px !important; padding-top: 2rem !important; }
 
-    /* Header */
-    .hero-section { background: linear-gradient(135deg, #1e293b, #0f172a); padding: 35px 20px; border-radius: 20px; text-align: center; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5); border: 1px solid #334155; margin-bottom: 2rem; }
-    .hero-title { font-size: clamp(1.4rem, 2.5vw, 2rem); font-weight: 800; color: #ffffff; margin-bottom: 0.5rem; line-height: 1.2; }
-    .hero-subtitle { font-size: clamp(0.8rem, 1.5vw, 1rem); color: #94a3b8; }
+    /* Khung chứa tài liệu - Thiết kế lại toàn bộ */
+    [data-testid="stVerticalBlockBorderWrapper"] { 
+        background: #ffffff; 
+        border-radius: 12px; 
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e2e8f0;
+        padding: 1.2rem; 
+        margin-bottom: 1rem;
+        transition: all 0.2s ease;
+    }
+    [data-testid="stVerticalBlockBorderWrapper"]:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border-color: #cbd5e1;
+    }
 
-    /* Thẻ chứa tài liệu */
-    [data-testid="stVerticalBlockBorderWrapper"] { background: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.2); border: none; padding: 1rem 1.5rem; margin-bottom: 0.8rem; }
-
-    /* TĂNG KÍCH THƯỚC CHỮ TABS */
+    /* Tabs to rõ ràng */
     .stTabs [data-baseweb="tab-list"] { gap: 10px; background-color: #1e293b; padding: 8px; border-radius: 12px; justify-content: center; }
-    .stTabs [data-baseweb="tab"] { background-color: transparent; border-radius: 8px; color: #94a3b8; font-weight: 600; font-size: 1.2rem !important; padding: 10px 20px; border: none; }
+    .stTabs [data-baseweb="tab"] { background-color: transparent; border-radius: 8px; color: #94a3b8; font-weight: 600; font-size: 1.15rem !important; padding: 10px 24px; border: none; }
     .stTabs [aria-selected="true"] { background-color: #3b82f6 !important; color: white !important; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
 
-    /* TĂNG KÍCH THƯỚC CHỮ TÊN THƯ MỤC (EXPANDER) */
-    [data-testid="stExpander"] details summary p {
-        font-size: 1.25rem !important;
-        font-weight: 800 !important;
-        color: #0f172a !important;
-    }
-
-    /* NÚT BẤM VÀ CHECKBOX KHÔNG BỊ RỚT DÒNG */
+    /* Nút tải về gọn gàng */
     .stLinkButton > a {
-        white-space: nowrap !important;
-        padding: 0.4rem 0.5rem !important;
+        background-color: #3b82f6 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 6px !important;
+        font-weight: 600 !important;
         font-size: 0.95rem !important;
-        border-radius: 8px !important;
+        padding: 0.4rem 1rem !important;
+        text-decoration: none !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-    .stCheckbox label p {
-        white-space: nowrap !important;
+    .stLinkButton > a:hover { background-color: #2563eb !important; color: white !important; }
+    
+    /* Checkbox thu gọn, không rớt dòng */
+    div[data-testid="stCheckbox"] { margin-bottom: 0 !important; }
+    div[data-testid="stCheckbox"] label p {
         font-size: 0.95rem !important;
         font-weight: 600 !important;
         color: #334155 !important;
     }
-    .stCheckbox {
-        display: flex;
-        align-items: center;
-        height: 100%;
-    }
 
-    /* Kết quả */
+    /* Kết quả tra cứu */
     .result-card { background: #ffffff; border-radius: 16px; padding: 25px; margin-top: 20px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.2); }
     .result-success { border-left: 8px solid #10b981; }
     .result-error { border-left: 8px solid #ef4444; }
@@ -80,13 +86,19 @@ st.markdown("""
     .result-data { font-size: 1.2rem; color: #334155; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
     .phone-alert { background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 20px; margin-top: 20px; }
     .phone-number { font-size: 2.2rem; font-weight: 800; color: #dc2626; display: block; margin-top: 5px; }
+    
+    /* Header */
+    .hero-section { background: linear-gradient(135deg, #1e293b, #0f172a); padding: 35px 20px; border-radius: 20px; text-align: center; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5); border: 1px solid #334155; margin-bottom: 2rem; }
+    .hero-title { font-size: clamp(1.4rem, 2.5vw, 2rem); font-weight: 800; color: #ffffff; margin-bottom: 0.5rem; line-height: 1.2; }
+    .hero-subtitle { font-size: clamp(0.8rem, 1.5vw, 1rem); color: #94a3b8; }
 </style>
 """, unsafe_allow_html=True)
 
-# Nút chọn ngôn ngữ góc trên phải
-_, col_lang = st.columns([4, 1])
+# THANH CHỌN NGÔN NGỮ (FIX LỖI RỚT DÒNG)
+col_space, col_lang = st.columns([7, 3])
 with col_lang:
-    render_language_selector()
+    with st.container(border=True):
+        render_language_selector()
 
 db = get_db()
 FERNET_KEY = st.secrets["fernet_key"]
@@ -109,7 +121,7 @@ def load_docs_in(cat_id):
     return [(d.id, d.to_dict()) for d in docs]
 
 # ==========================================
-# HÀM HIỂN THỊ TÀI LIỆU (ĐÃ CHỈNH SỬA BỐ CỤC)
+# HÀM HIỂN THỊ TÀI LIỆU (THIẾT KẾ LẠI 2 HÀNG)
 # ==========================================
 def render_docs(cat_id):
     docs = load_docs_in(cat_id)
@@ -118,26 +130,27 @@ def render_docs(cat_id):
         return
     for doc_id, d in docs:
         with st.container(border=True):
-            # Chia tỷ lệ cột: Tên file(5) | Nút Tải(2) | Checkbox(3)
-            col1, col2, col3 = st.columns([5, 2, 3], vertical_alignment="center")
+            # HÀNG 1: TÊN FILE (To, rõ)
+            st.markdown(
+                f"<div style='font-size: 1.15rem; font-weight: 700; color: #1e293b; margin-bottom: 8px;'>"
+                f"📄 {d.get('tieu_de','')} "
+                f"<span style='color:#64748b; font-size:0.9rem; font-weight:500;'>[{d.get('file_type','?').upper()}]</span>"
+                f"</div>", 
+                unsafe_allow_html=True
+            )
             
-            with col1:
-                # Tăng kích thước chữ tên file
-                st.markdown(
-                    f"<div style='font-size: 1.15rem; font-weight: 700; color: #1e293b;'>"
-                    f"📄 {d.get('tieu_de','')} "
-                    f"<span style='color:#64748b; font-size:0.85rem; font-weight:400;'>[{d.get('file_type','?').upper()}]</span>"
-                    f"</div>", 
-                    unsafe_allow_html=True
-                )
+            # HÀNG 2: NÚT TẢI VỀ VÀ CHECKBOX (Nằm ngang, cân đối)
+            col_btn, col_chk = st.columns([1, 3], vertical_alignment="center")
             
-            with col2:
-                st.link_button(t('btn_download'), d.get('file_url','#'), use_container_width=True)
+            with col_btn:
+                st.link_button("📥 " + t('btn_download'), d.get('file_url','#'), use_container_width=True)
             
-            with col3:
-                show_preview = st.checkbox(t('view_preview'), key=f"chk_preview_{doc_id}")
+            with col_chk:
+                show_preview = st.checkbox("👁️ " + t('view_preview'), key=f"chk_preview_{doc_id}")
             
+            # NẾU CHỌN XEM TRƯỚC
             if show_preview:
+                st.markdown("<hr style='margin: 10px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
                 file_type = d.get('file_type', '').lower()
                 file_url = d.get('file_url', '')
                 
@@ -148,6 +161,7 @@ def render_docs(cat_id):
                     components.iframe(iframe_url, height=500, scrolling=True)
                 else:
                     st.text(d.get("noi_dung_text", "")[:5000])
+
 
 tab_a, tab_b = st.tabs([t('tab_prop'), t('tab_search')])
 
@@ -173,6 +187,7 @@ with tab_a:
                 render_docs(child_id)
 
 with tab_b:
+    # ... (Phần Tra cứu giữ nguyên) ...
     st.markdown(f"<h3 style='color: #0f172a; text-align: center;'>{t('search_h')}</h3>", unsafe_allow_html=True)
     st.caption(t('search_desc'))
 
