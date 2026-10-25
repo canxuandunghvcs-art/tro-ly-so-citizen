@@ -1,6 +1,7 @@
-"""Cổng công dân – Giao diện Dark Mode, Tách biệt thẻ tài liệu."""
+"""Cổng công dân – Giao diện Dark Mode, Tích hợp cảnh báo đường dây nóng."""
 import os
 import tempfile
+import time
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -28,17 +29,15 @@ st.markdown("""
     }
     .block-container { max-width: 900px !important; padding-top: 2rem !important; }
 
-    /* ==========================================
-       FIX LỖI PHÂN CÁCH: THÊM VIỀN XANH BÊN TRÁI
-       ========================================== */
+    /* Khung chứa tài liệu - Tinh tế, có viền xanh nhạt bên trái */
     [data-testid="stVerticalBlockBorderWrapper"] { 
         background: #ffffff; 
         border-radius: 8px; 
         border: 1px solid #e2e8f0;
-        border-left: 5px solid #3b82f6; /* Vạch xanh phân cách cực đẹp */
+        border-left: 4px solid #3b82f6; /* Viền xanh phân cách */
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         padding: 1.2rem; 
-        margin-bottom: 1.2rem; /* Tăng khoảng cách giữa các thẻ */
+        margin-bottom: 1.2rem; 
     }
 
     /* Tabs */
@@ -48,47 +47,19 @@ st.markdown("""
 
     /* Nút Tải Về (HTML) */
     .action-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background-color: #eff6ff;
-        color: #2563eb !important;
-        border: 1.5px solid #bfdbfe;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.9rem;
-        padding: 0.5rem 1rem;
-        text-decoration: none !important;
-        transition: all 0.2s ease;
-        cursor: pointer;
-        width: 100%;
-        box-sizing: border-box;
+        display: inline-flex; align-items: center; justify-content: center;
+        background-color: #eff6ff; color: #2563eb !important;
+        border: 1.5px solid #bfdbfe; border-radius: 8px;
+        font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem;
+        text-decoration: none !important; transition: all 0.2s ease;
+        cursor: pointer; width: 100%; box-sizing: border-box;
     }
-    .action-btn:hover {
-        background-color: #dbeafe;
-        border-color: #93c5fd;
-        color: #1e40af !important;
-    }
+    .action-btn:hover { background-color: #dbeafe; border-color: #93c5fd; color: #1e40af !important; }
 
-    /* Xóa nền trắng của Checkbox và căn giữa */
-    div[data-testid="stCheckbox"] { 
-        margin: 0 !important; 
-        padding: 0 !important; 
-        background: transparent !important; 
-        display: flex;
-        align-items: center;
-        height: 100%;
-    }
-    div[data-testid="stCheckbox"] label {
-        background: transparent !important;
-        padding: 0 !important;
-    }
-    div[data-testid="stCheckbox"] label p {
-        font-size: 0.95rem !important;
-        font-weight: 600 !important;
-        color: #334155 !important;
-        white-space: nowrap !important;
-    }
+    /* Xóa nền trắng của Checkbox */
+    div[data-testid="stCheckbox"] { margin: 0 !important; padding: 0 !important; background: transparent !important; display: flex; align-items: center; height: 100%; }
+    div[data-testid="stCheckbox"] label { background: transparent !important; padding: 0 !important; }
+    div[data-testid="stCheckbox"] label p { font-size: 0.95rem !important; font-weight: 600 !important; color: #334155 !important; white-space: nowrap !important; }
 
     /* Header */
     .hero-section { background: linear-gradient(135deg, #1e293b, #0f172a); padding: 30px 20px; border-radius: 16px; text-align: center; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5); border: 1px solid #334155; margin-bottom: 1.5rem; }
@@ -101,12 +72,14 @@ st.markdown("""
     .result-error { border-left: 8px solid #ef4444; }
     .result-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 15px; }
     .result-data { font-size: 1.2rem; color: #334155; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
-    .phone-alert { background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 20px; margin-top: 20px; }
-    .phone-number { font-size: 2.2rem; font-weight: 800; color: #dc2626; display: block; margin-top: 5px; }
+    
+    /* Khung cảnh báo đường dây nóng */
+    .phone-alert { background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 20px; margin-top: 20px; text-align: center; }
+    .phone-number { font-size: 2.5rem; font-weight: 800; color: #dc2626; display: block; margin-top: 5px; letter-spacing: 2px; }
 </style>
 """, unsafe_allow_html=True)
 
-# THANH CHỌN NGÔN NGỮ GỌN GÀNG
+# THANH CHỌN NGÔN NGỮ
 col_space, col_lang = st.columns([7, 3])
 with col_lang:
     render_language_selector()
@@ -142,7 +115,6 @@ def render_docs(cat_id):
         
     for doc_id, d in docs:
         with st.container(border=True):
-            # HÀNG 1: TÊN FILE
             st.markdown(
                 f"<div style='font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 12px;'>"
                 f"📄 {d.get('tieu_de','')} "
@@ -151,21 +123,12 @@ def render_docs(cat_id):
                 unsafe_allow_html=True
             )
             
-            # HÀNG 2: 2 NÚT BẤM NẰM NGANG
             col_btn_dl, col_btn_prev = st.columns([1, 1], gap="small")
-            
             with col_btn_dl:
-                # Nút Tải Về (HTML)
-                st.markdown(
-                    f'<a href="{d.get("file_url","#")}" target="_blank" class="action-btn">📥 {t("btn_download")}</a>',
-                    unsafe_allow_html=True
-                )
-                
+                st.markdown(f'<a href="{d.get("file_url","#")}" target="_blank" class="action-btn">📥 {t("btn_download")}</a>', unsafe_allow_html=True)
             with col_btn_prev:
-                # SỬA LỖI 2 CON MẮT: Bỏ emoji ở đây vì trong translations.py đã có
                 show_preview = st.checkbox(t('view_preview'), key=f"chk_preview_{doc_id}")
             
-            # NẾU CHỌN XEM TRƯỚC
             if show_preview:
                 st.markdown("<hr style='margin: 15px 0 10px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
                 file_type = d.get('file_type', '').lower()
@@ -181,6 +144,9 @@ def render_docs(cat_id):
 
 tab_a, tab_b = st.tabs([t('tab_prop'), t('tab_search')])
 
+# ------------------------------------------
+# TAB A: NỘI DUNG TUYÊN TRUYỀN
+# ------------------------------------------
 with tab_a:
     cats = load_categories()
     cat_dict = {cid: data for cid, data in cats}
@@ -202,6 +168,9 @@ with tab_a:
                 st.markdown(f"&nbsp;&nbsp;&nbsp;↳ **{child['ten']}**", unsafe_allow_html=True)
                 render_docs(child_id)
 
+# ------------------------------------------
+# TAB B: TRA CỨU THÔNG TIN
+# ------------------------------------------
 with tab_b:
     st.markdown(f"<h3 style='color: #0f172a; text-align: center;'>{t('search_h')}</h3>", unsafe_allow_html=True)
     st.caption(t('search_desc'))
@@ -219,17 +188,24 @@ with tab_b:
     if photo:
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button(t('btn_search'), use_container_width=True):
-            with st.spinner(t('processing')):
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
-                    tmp.write(photo.read())
-                    tmp_path = tmp.name
+            
+            with st.status("Hệ thống đang xử lý...", expanded=True) as status:
                 try:
-                    # BƯỚC 1: Trích xuất đặc trưng (Có thể ném lỗi nếu ảnh mờ)
-                    emb = extract_embedding(tmp_path)
+                    status.write("📸 Đang tải ảnh lên bộ nhớ tạm...")
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
+                        tmp.write(photo.read())
+                        tmp_path = tmp.name
                     
-                    # BƯỚC 2: So khớp
+                    status.write("🧠 Đang phân tích khuôn mặt (Quá trình này có thể mất vài giây)...")
+                    start_time = time.time()
+                    emb = extract_embedding(tmp_path)
+                    time_ai = time.time() - start_time
+                    
+                    status.write("🔍 Đang so khớp với cơ sở dữ liệu...")
+                    start_time = time.time()
                     best_doc, best_score = None, -1.0
                     count = 0
+                    
                     for doc in db.collection("doi_tuong").stream():
                         data = doc.to_dict()
                         enc = data.get("embedding_encrypted")
@@ -237,22 +213,61 @@ with tab_b:
                         score = cosine_similarity(emb, decrypt_embedding(enc, FERNET_KEY))
                         if score > best_score: best_score, best_doc = score, data
                         count += 1
-
+                    
+                    time_db = time.time() - start_time
+                    status.update(label="✅ Phân tích hoàn tất!", state="complete", expanded=False)
+                    
+                    # ==========================================
+                    # HIỂN THỊ KẾT QUẢ VÀ CẢNH BÁO SỐ ĐIỆN THOẠI
+                    # ==========================================
                     if best_doc and best_score >= MATCH_THRESHOLD:
-                        # ... (Hiển thị kết quả thành công) ...
-                        pass
+                        st.markdown(f"""
+                        <div class="result-card result-success">
+                            <div class="result-title">✅ {t('res_success')}</div>
+                            <div style="color: #64748b; margin-bottom: 15px;">
+                                {t('res_score')} <b>{best_score:.2%}</b> <br>
+                                <span style="font-size: 0.8rem;">(AI: {time_ai:.1f}s | Đối chiếu {count} hồ sơ: {time_db:.1f}s)</span>
+                            </div>
+                            <div class="result-data"><b>{t('res_name')}</b> {best_doc.get('ho_ten','')}</div>
+                            <div class="result-data"><b>{t('res_nation')}</b> {best_doc.get('quoc_tich','')}</div>
+                            <div class="result-data"><b>{t('res_pass')}</b> <code>{best_doc.get('so_ho_chieu','')}</code></div>
+                        </div>""", unsafe_allow_html=True)
+                        
+                        if best_doc.get("anh_url"): 
+                            st.image(best_doc["anh_url"], width=150, caption=t('res_img'))
+                        
+                        # HIỂN THỊ ĐƯỜNG DÂY NÓNG TỪ FIREBASE
+                        contact = db.collection("cau_hinh").document("lien_he").get()
+                        if contact.exists and contact.to_dict().get("danh_sach"):
+                            for it in contact.to_dict().get("danh_sach"):
+                                st.markdown(f"""
+                                <div class="phone-alert">
+                                    <div style="color: #7f1d1d; font-weight: 700; font-size: 1.2rem; margin-bottom: 5px;">
+                                        🚨 {t('hotline_name')} {it['ten']}
+                                    </div>
+                                    <span class="phone-number">{it['so_dien_thoai']}</span>
+                                    <div style="color: #b91c1c; font-size: 1rem; margin-top: 5px;">
+                                        <i>{it.get('mo_ta','')}</i>
+                                    </div>
+                                </div>""", unsafe_allow_html=True)
+                        else: 
+                            st.warning("Hệ thống chưa cấu hình số điện thoại đường dây nóng.")
+                    
                     else:
-                        # Hiển thị điểm số cao nhất để dễ debug
                         score_text = f"Điểm tương đồng cao nhất: {best_score:.2f} (Cần >= {MATCH_THRESHOLD})" if best_score > 0 else ""
                         st.markdown(f"""
                         <div class="result-card result-error">
-                            <div class="result-title" style="color: #dc2626;">❌ Không tìm thấy thông tin</div>
-                            <p style="color: #64748b;">Hình ảnh không trùng khớp với dữ liệu hệ thống.</p>
+                            <div class="result-title" style="color: #dc2626;">❌ {t('res_fail')}</div>
+                            <p style="color: #64748b;">{t('res_fail_desc')}</p>
                             <p style="font-size: 0.9rem; color: #94a3b8;">{score_text}</p>
                         </div>""", unsafe_allow_html=True)
                 
                 except ValueError as ve:
-                    # BẮT LỖI KHÔNG TÌM THẤY MẶT
+                    status.update(label="❌ Không tìm thấy khuôn mặt", state="error", expanded=True)
                     st.error(f"⚠️ {ve}")
                 except Exception as e:
+                    status.update(label="❌ Đã xảy ra lỗi", state="error", expanded=True)
                     st.error(f"Lỗi xử lý ảnh: {e}")
+                finally:
+                    if 'tmp_path' in locals() and os.path.exists(tmp_path):
+                        os.unlink(tmp_path)
