@@ -6,3 +6,4 @@ tensorflow-cpu==2.16.1
 cryptography==43.0.3
 Pillow==10.4.0
 numpy==1.26.4
+opencv-python-headless   # <-- Thay thế cho opencv-python
