@@ -1,4 +1,4 @@
-"""Cổng công dân – Giao diện Dark Mode, Premium UI."""
+"""Cổng công dân – Giao diện Dark Mode, Premium UI, Chữ to rõ ràng."""
 import os
 import tempfile
 import streamlit as st
@@ -11,32 +11,38 @@ from utils.constants import MATCH_THRESHOLD
 st.set_page_config(page_title="Cổng Công dân", page_icon="🛡️", layout="wide")
 
 # ==========================================================
-# CSS TÙY CHỈNH: GIAO DIỆN DARK MODE & HIỆU ỨNG GLOW
+# CSS TÙY CHỈNH: DARK MODE, GLOW & TĂNG KÍCH THƯỚC CHỮ
 # ==========================================================
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     
-    /* 1. Cấu hình nền tối toàn trang */
+    /* 1. Cấu hình nền tối toàn trang & Tăng cỡ chữ mặc định */
     [data-testid="stAppViewContainer"] {
         background-color: #0f172a;
         background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
         font-family: 'Inter', sans-serif;
     }
+    
+    /* Tăng cỡ chữ cho các thành phần mặc định của Streamlit (Markdown, Caption, Label) */
+    .stMarkdown p, .stCaption, label, .st-emotion-cache-16idsys p {
+        font-size: 1.15rem !important; 
+    }
+
     header {visibility: hidden;}
     footer {visibility: hidden;}
 
     /* 2. Giới hạn nội dung */
     .block-container {
-        max-width: 900px !important;
+        max-width: 950px !important;
         padding-top: 2rem !important;
         padding-bottom: 2rem !important;
     }
 
-    /* 3. Hero Header (Dải màu tối) */
+    /* 3. Hero Header (Dải màu tối) - Chữ to hơn */
     .hero-section {
         background: linear-gradient(135deg, #1e293b, #0f172a);
-        padding: 40px 20px;
+        padding: 45px 20px;
         border-radius: 20px;
         text-align: center;
         box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
@@ -44,14 +50,14 @@ st.markdown("""
         margin-bottom: 2rem;
     }
     .hero-title {
-        font-size: 2.5rem;
+        font-size: 3.2rem; /* Tăng từ 2.5rem lên 3.2rem */
         font-weight: 800;
         color: #ffffff;
         margin-bottom: 0.5rem;
         letter-spacing: -1px;
     }
     .hero-subtitle {
-        font-size: 1.1rem;
+        font-size: 1.3rem; /* Tăng từ 1.1rem lên 1.3rem */
         color: #94a3b8;
     }
 
@@ -61,15 +67,15 @@ st.markdown("""
         border-radius: 16px;
         box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
         border: none;
-        padding: 2rem;
+        padding: 2.5rem; /* Tăng khoảng trống bên trong thẻ */
         margin-bottom: 1rem;
     }
 
-    /* 5. Tùy chỉnh Tabs (Nút bấm) */
+    /* 5. Tùy chỉnh Tabs (Nút bấm) - Chữ to hơn */
     .stTabs [data-baseweb="tab-list"] {
         gap: 10px;
         background-color: #1e293b;
-        padding: 8px;
+        padding: 10px;
         border-radius: 12px;
         justify-content: center;
     }
@@ -78,7 +84,8 @@ st.markdown("""
         border-radius: 8px;
         color: #94a3b8;
         font-weight: 600;
-        padding: 10px 20px;
+        font-size: 1.2rem; /* Tăng cỡ chữ Tabs */
+        padding: 12px 24px;
         border: none;
     }
     .stTabs [aria-selected="true"] {
@@ -87,15 +94,15 @@ st.markdown("""
         box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
     }
 
-    /* 6. Nút bấm Tra cứu (Glow Button) */
+    /* 6. Nút bấm Tra cứu (Glow Button) - Chữ cực to */
     .stButton > button {
         width: 100%;
         background: linear-gradient(90deg, #3b82f6, #2563eb) !important;
         color: white !important;
         border: none !important;
         border-radius: 12px !important;
-        padding: 1rem !important;
-        font-size: 1.1rem !important;
+        padding: 1.2rem !important;
+        font-size: 1.4rem !important; /* Tăng cỡ chữ nút */
         font-weight: 700 !important;
         text-transform: uppercase;
         letter-spacing: 1px;
@@ -114,8 +121,11 @@ st.markdown("""
         border: 2px dashed #cbd5e1;
         padding: 1.5rem;
     }
+    [data-testid="stCameraInput"] button {
+        font-size: 1.2rem !important; /* Nút chụp ảnh to hơn */
+    }
     
-    /* 8. Custom Result Card (Hiển thị kết quả) */
+    /* 8. Custom Result Card (Hiển thị kết quả) - Chữ to rõ */
     .result-card {
         background: #ffffff;
         border-radius: 16px;
@@ -130,27 +140,30 @@ st.markdown("""
         border-left: 8px solid #ef4444;
     }
     .result-title {
-        font-size: 1.5rem;
+        font-size: 2rem; /* Tăng từ 1.5rem lên 2rem */
         font-weight: 800;
         color: #1e293b;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
     }
     .result-data {
-        font-size: 1.1rem;
+        font-size: 1.35rem; /* Tăng từ 1.1rem lên 1.35rem */
         color: #334155;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
         border-bottom: 1px solid #e2e8f0;
-        padding-bottom: 10px;
+        padding-bottom: 12px;
     }
     .phone-alert {
         background: #fef2f2;
         border: 1px solid #fecaca;
         border-radius: 12px;
-        padding: 20px;
+        padding: 25px;
         margin-top: 20px;
     }
+    .phone-alert div:first-child {
+        font-size: 1.3rem;
+    }
     .phone-number {
-        font-size: 1.8rem;
+        font-size: 2.5rem; /* Số điện thoại cực to */
         font-weight: 800;
         color: #dc2626;
         display: block;
@@ -227,7 +240,7 @@ with tab_a:
 # TAB B: TRA CỨU KHUÔN MẶT
 # ============================================================
 with tab_b:
-    st.markdown("<h3 style='color: #0f172a; text-align: center;'>Tra cứu thông tin qua khuôn mặt</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #0f172a; text-align: center; font-size: 2rem;'>Tra cứu thông tin qua khuôn mặt</h3>", unsafe_allow_html=True)
     st.caption("Vui lòng cung cấp ảnh chân dung rõ mặt để hệ thống đối chiếu với cơ sở dữ liệu.")
 
     with st.container(border=True):
@@ -278,16 +291,16 @@ with tab_b:
                         st.markdown(f"""
                         <div class="result-card result-success">
                             <div class="result-title">✅ Tìm thấy thông tin trùng khớp</div>
-                            <div style="color: #64748b; margin-bottom: 15px;">Độ tin cậy: <b>{best_score:.2%}</b></div>
+                            <div style="color: #64748b; margin-bottom: 20px; font-size: 1.2rem;">Độ tin cậy: <b>{best_score:.2%}</b></div>
                             
                             <div class="result-data"><b>Họ tên:</b> {best_doc.get('ho_ten','')}</div>
                             <div class="result-data"><b>Quốc tịch:</b> {best_doc.get('quoc_tich','')}</div>
-                            <div class="result-data"><b>Số hộ chiếu:</b> <code>{best_doc.get('so_ho_chieu','')}</code></div>
+                            <div class="result-data"><b>Số hộ chiếu:</b> <code style="font-size: 1.4rem;">{best_doc.get('so_ho_chieu','')}</code></div>
                         </div>
                         """, unsafe_allow_html=True)
 
                         if best_doc.get("anh_url"):
-                            st.image(best_doc["anh_url"], width=150, caption="Ảnh đối tượng")
+                            st.image(best_doc["anh_url"], width=180, caption="Ảnh đối tượng")
 
                         # Hiển thị số điện thoại
                         contact = db.collection("cau_hinh").document("lien_he").get()
@@ -299,7 +312,7 @@ with tab_b:
                                         f"""<div class="phone-alert">
                                             <div style="color: #7f1d1d; font-weight: 600;">📞 Đường dây nóng: {it['ten']}</div>
                                             <span class="phone-number">{it['so_dien_thoai']}</span>
-                                            <div style="color: #b91c1c; font-size: 0.9rem;">{it.get('mo_ta','')}</div>
+                                            <div style="color: #b91c1c; font-size: 1.1rem; margin-top: 5px;">{it.get('mo_ta','')}</div>
                                         </div>""",
                                         unsafe_allow_html=True
                                     )
@@ -308,7 +321,7 @@ with tab_b:
                         st.markdown("""
                         <div class="result-card result-error">
                             <div class="result-title" style="color: #dc2626;">❌ Không tìm thấy thông tin</div>
-                            <p style="color: #64748b;">Hình ảnh của bạn không trùng khớp với bất kỳ dữ liệu nào trên hệ thống.</p>
+                            <p style="color: #64748b; font-size: 1.2rem;">Hình ảnh của bạn không trùng khớp với bất kỳ dữ liệu nào trên hệ thống.</p>
                         </div>
                         """, unsafe_allow_html=True)
                 except Exception as e:
