@@ -9,6 +9,7 @@ LANGUAGES = {
 
 TRANSLATIONS = {
     "vi": {
+        "nav_home": "Trang chủ",
         "app_title": "TRỢ LÝ SỐ",
         "app_sub": "Hệ thống Quản lý Người nước ngoài",
         "portal_title": "CỔNG THÔNG TIN CÔNG DÂN",
@@ -126,6 +127,7 @@ TRANSLATIONS = {
         "view_preview": "👁️ Xem trước nội dung"
     },
     "en": {
+        "nav_home": "Home",
         "app_title": "DIGITAL ASSISTANT",
         "app_sub": "Foreigner Management System",
         "portal_title": "CITIZEN INFORMATION PORTAL",
@@ -243,6 +245,7 @@ TRANSLATIONS = {
         "view_preview": "👁️ Preview content"
     },
     "zh": {
+        "nav_home": "首页",
         "app_title": "数字助手",
         "app_sub": "外国人管理系统",
         "portal_title": "公民信息门户",
@@ -360,6 +363,7 @@ TRANSLATIONS = {
         "view_preview": "👁️ 预览内容"
     },
     "fr": {
+        "nav_home": "Accueil",
         "app_title": "ASSISTANT NUMÉRIQUE",
         "app_sub": "Système de Gestion des Étrangers",
         "portal_title": "PORTAIL D'INFORMATION CITOYEN",
@@ -477,6 +481,7 @@ TRANSLATIONS = {
         "view_preview": "👁️ Aperçu du contenu"
     },
     "ko": {
+        "nav_home": "홈",
         "app_title": "디지털 비서",
         "app_sub": "외국인 관리 시스템",
         "portal_title": "시민 정보 포털",
@@ -594,6 +599,7 @@ TRANSLATIONS = {
         "view_preview": "👁️ 내용 미리보기"
     },
     "ja": {
+        "nav_home": "ホーム",
         "app_title": "デジタルアシスタント",
         "app_sub": "外国人管理システム",
         "portal_title": "市民情報ポータル",
