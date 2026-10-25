@@ -15,20 +15,16 @@ def t(key):
 def render_language_selector():
     init_language()
     
-    # CSS ÉP THANH NGÔN NGỮ GỌN GÀNG
+    # CSS Ẩn nhãn mặc định của Selectbox để tự làm nhãn HTML
     st.markdown("""
     <style>
-        /* Ẩn label mặc định */
         div[data-testid="stSelectbox"] > label { display: none !important; }
-        
-        /* Làm gọn ô selectbox */
         div[data-testid="stSelectbox"] > div > div {
-            background-color: #f8fafc !important;
-            border: 1px solid #e2e8f0 !important;
+            background-color: #ffffff !important;
+            border: 1px solid #cbd5e1 !important;
             border-radius: 8px !important;
             min-height: 38px !important;
         }
-        /* Màu chữ bên trong */
         div[data-testid="stSelectbox"] div[data-baseweb="select"] * {
             color: #0f172a !important;
             font-weight: 600 !important;
@@ -37,6 +33,9 @@ def render_language_selector():
     </style>
     """, unsafe_allow_html=True)
 
+    # Tách nhãn và ô chọn thành 2 phần riêng biệt để không bị dồn ép
+    st.markdown("<div style='font-size: 0.9rem; font-weight: 600; color: #1e293b; margin-bottom: 5px;'>🌐 Language / Ngôn ngữ</div>", unsafe_allow_html=True)
+    
     st.selectbox(
         "Language",
         options=list(LANGUAGES.keys()),
