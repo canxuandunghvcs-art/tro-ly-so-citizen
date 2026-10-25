@@ -1,0 +1,8 @@
+streamlit==1.40.0
+firebase-admin==6.5.0
+deepface==0.0.93
+tf-keras==2.16.0
+tensorflow-cpu==2.16.1
+cryptography==43.0.3
+Pillow==10.4.0
+numpy==1.26.4
