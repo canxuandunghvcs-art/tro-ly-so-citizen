@@ -1,4 +1,4 @@
-"""Cổng công dân – Giao diện Dark Mode, Nút bấm tự động theo diện tích chữ."""
+"""Cổng công dân – Giao diện Dark Mode, Nút bấm HTML siêu đẹp."""
 import os
 import tempfile
 import streamlit as st
@@ -11,20 +11,15 @@ from utils.i18n import t, render_language_selector
 
 st.set_page_config(page_title="Citizen Portal", page_icon="🛡️", layout="wide")
 
-# 1. ẨN SIDEBAR
+# 1. ẨN SIDEBAR & CSS TOÀN CỤC
 st.markdown("""
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    
     [data-testid="stSidebar"] { display: none !important; }
     [data-testid="stSidebarNav"] { display: none !important; }
     header {visibility: hidden;}
     footer {visibility: hidden;}
-</style>
-""", unsafe_allow_html=True)
-
-# 2. CSS GIAO DIỆN CHUẨN (KHÔNG ÉP KHUÔN)
-st.markdown("""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     
     [data-testid="stAppViewContainer"] {
         background-color: #0f172a;
@@ -39,8 +34,8 @@ st.markdown("""
         border-radius: 12px; 
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         border: 1px solid #e2e8f0;
-        padding: 1rem 1.2rem; 
-        margin-bottom: 0.8rem;
+        padding: 1.2rem; 
+        margin-bottom: 1rem;
     }
 
     /* Tabs */
@@ -48,24 +43,37 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] { background-color: transparent; border-radius: 8px; color: #94a3b8; font-weight: 600; font-size: 1.15rem !important; padding: 10px 24px; border: none; }
     .stTabs [aria-selected="true"] { background-color: #3b82f6 !important; color: white !important; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
 
-    /* XÓA NỀN TRẮNG CỦA CHECKBOX VÀ CĂN GIỮA */
-    div[data-testid="stCheckbox"] { 
-        margin: 0 !important; 
-        padding: 0 !important; 
-        background: transparent !important; 
-    }
-    div[data-testid="stCheckbox"] label {
-        background: transparent !important;
-        padding: 0 !important;
-        display: flex;
+    /* CSS CHO NÚT BẤM HTML (CÓ VIỀN) */
+    .action-btn {
+        display: inline-flex;
         align-items: center;
-    }
-    div[data-testid="stCheckbox"] label p {
-        font-size: 0.95rem !important;
-        font-weight: 600 !important;
+        justify-content: center;
+        background-color: #ffffff;
         color: #334155 !important;
-        white-space: nowrap !important;
-        margin-left: 5px !important;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+        text-decoration: none !important;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .action-btn:hover {
+        background-color: #f8fafc;
+        border-color: #94a3b8;
+        color: #0f172a !important;
+    }
+    .action-btn-blue {
+        background-color: #eff6ff;
+        color: #2563eb !important;
+        border-color: #bfdbfe;
+    }
+    .action-btn-blue:hover {
+        background-color: #dbeafe;
+        border-color: #93c5fd;
     }
 
     /* Header */
@@ -84,11 +92,10 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# THANH CHỌN NGÔN NGỮ (Đặt cố định góc trên, gọn gàng)
-col_space, col_lang = st.columns([6, 4])
+# THANH CHỌN NGÔN NGỮ GỌN GÀNG (Đưa lên góc phải)
+col_space, col_lang = st.columns([7, 3])
 with col_lang:
-    with st.container(border=True):
-        render_language_selector()
+    render_language_selector()
 
 db = get_db()
 FERNET_KEY = st.secrets["fernet_key"]
@@ -111,34 +118,41 @@ def load_docs_in(cat_id):
     return [(d.id, d.to_dict()) for d in docs]
 
 # ==========================================
-# HÀM HIỂN THỊ TÀI LIỆU (BỐ CỤC TỰ NHIÊN)
+# HÀM HIỂN THỊ TÀI LIỆU (ĐÃ FIX HOÀN TOÀN)
 # ==========================================
 def render_docs(cat_id):
     docs = load_docs_in(cat_id)
     if not docs:
         st.caption(t('no_docs'))
         return
+        
     for doc_id, d in docs:
         with st.container(border=True):
-            # Tên file ở trên cùng (To rõ)
+            # HÀNG 1: TÊN FILE
             st.markdown(
-                f"<div style='font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 8px;'>"
+                f"<div style='font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 12px;'>"
                 f"📄 {d.get('tieu_de','')} "
                 f"<span style='color:#64748b; font-size:0.85rem; font-weight:500;'>[{d.get('file_type','?').upper()}]</span>"
                 f"</div>", 
                 unsafe_allow_html=True
             )
             
-            # Nút Tải về và Checkbox nằm dưới, tự động co giãn
-            col_btn, col_chk = st.columns([2, 5], vertical_alignment="center")
+            # HÀNG 2: 2 NÚT BẤM NẰM NGANG
+            col_btn_dl, col_btn_prev = st.columns([1, 1], gap="small")
             
-            with col_btn:
-                # BỎ use_container_width=True, để nút tự co theo chữ
-                st.link_button("📥 " + t('btn_download'), d.get('file_url','#'))
+            with col_btn_dl:
+                # Nút Tải Về (HTML)
+                st.markdown(
+                    f'<a href="{d.get("file_url","#")}" target="_blank" class="action-btn action-btn-blue">📥 {t("btn_download")}</a>',
+                    unsafe_allow_html=True
+                )
+                
+            with col_btn_prev:
+                # Sử dụng st.checkbox nhưng ẩn label đi, dùng CSS của chúng ta để hiển thị
+                # Đặt label cho checkbox là "Xem trước", nhưng sẽ bị ẩn đi nhờ CSS bên dưới
+                show_preview = st.checkbox(f"👁️ {t('view_preview')}", key=f"chk_preview_{doc_id}")
             
-            with col_chk:
-                show_preview = st.checkbox("👁️ " + t('view_preview'), key=f"chk_preview_{doc_id}")
-            
+            # NẾU CHỌN XEM TRƯỚC
             if show_preview:
                 st.markdown("<hr style='margin: 15px 0 10px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
                 file_type = d.get('file_type', '').lower()
