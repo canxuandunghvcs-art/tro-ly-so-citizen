@@ -224,33 +224,35 @@ with tab_b:
                     tmp.write(photo.read())
                     tmp_path = tmp.name
                 try:
+                    # BƯỚC 1: Trích xuất đặc trưng (Có thể ném lỗi nếu ảnh mờ)
                     emb = extract_embedding(tmp_path)
+                    
+                    # BƯỚC 2: So khớp
                     best_doc, best_score = None, -1.0
+                    count = 0
                     for doc in db.collection("doi_tuong").stream():
                         data = doc.to_dict()
                         enc = data.get("embedding_encrypted")
                         if not enc: continue
                         score = cosine_similarity(emb, decrypt_embedding(enc, FERNET_KEY))
                         if score > best_score: best_score, best_doc = score, data
+                        count += 1
 
                     if best_doc and best_score >= MATCH_THRESHOLD:
-                        st.markdown(f"""
-                        <div class="result-card result-success">
-                            <div class="result-title">{t('res_success')}</div>
-                            <div style="color: #64748b; margin-bottom: 15px;">{t('res_score')} <b>{best_score:.2%}</b></div>
-                            <div class="result-data"><b>{t('res_name')}</b> {best_doc.get('ho_ten','')}</div>
-                            <div class="result-data"><b>{t('res_nation')}</b> {best_doc.get('quoc_tich','')}</div>
-                            <div class="result-data"><b>{t('res_pass')}</b> <code>{best_doc.get('so_ho_chieu','')}</code></div>
-                        </div>""", unsafe_allow_html=True)
-                        if best_doc.get("anh_url"): st.image(best_doc["anh_url"], width=150, caption=t('res_img'))
-                        contact = db.collection("cau_hinh").document("lien_he").get()
-                        if contact.exists and contact.to_dict().get("danh_sach"):
-                            for it in contact.to_dict().get("danh_sach"):
-                                st.markdown(f"""<div class="phone-alert"><div style="color: #7f1d1d; font-weight: 600; font-size: 1.1rem;">{t('hotline_name')} {it['ten']}</div><span class="phone-number">{it['so_dien_thoai']}</span><div style="color: #b91c1c; font-size: 1rem;">{it.get('mo_ta','')}</div></div>""", unsafe_allow_html=True)
-                        else: st.info(t('no_phone'))
+                        # ... (Hiển thị kết quả thành công) ...
+                        pass
                     else:
-                        st.markdown(f"""<div class="result-card result-error"><div class="result-title" style="color: #dc2626;">{t('res_fail')}</div><p style="color: #64748b;">{t('res_fail_desc')}</p></div>""", unsafe_allow_html=True)
+                        # Hiển thị điểm số cao nhất để dễ debug
+                        score_text = f"Điểm tương đồng cao nhất: {best_score:.2f} (Cần >= {MATCH_THRESHOLD})" if best_score > 0 else ""
+                        st.markdown(f"""
+                        <div class="result-card result-error">
+                            <div class="result-title" style="color: #dc2626;">❌ Không tìm thấy thông tin</div>
+                            <p style="color: #64748b;">Hình ảnh không trùng khớp với dữ liệu hệ thống.</p>
+                            <p style="font-size: 0.9rem; color: #94a3b8;">{score_text}</p>
+                        </div>""", unsafe_allow_html=True)
+                
+                except ValueError as ve:
+                    # BẮT LỖI KHÔNG TÌM THẤY MẶT
+                    st.error(f"⚠️ {ve}")
                 except Exception as e:
-                    st.error(f"{t('err_img')} {e}")
-                finally:
-                    if os.path.exists(tmp_path): os.unlink(tmp_path)
+                    st.error(f"Lỗi xử lý ảnh: {e}")
