@@ -1,4 +1,4 @@
-"""Cổng công dân – Giao diện Dark Mode, Nút bấm HTML siêu đẹp."""
+"""Cổng công dân – Giao diện Dark Mode, Tách biệt thẻ tài liệu."""
 import os
 import tempfile
 import streamlit as st
@@ -28,14 +28,17 @@ st.markdown("""
     }
     .block-container { max-width: 900px !important; padding-top: 2rem !important; }
 
-    /* Khung chứa tài liệu */
+    /* ==========================================
+       FIX LỖI PHÂN CÁCH: THÊM VIỀN XANH BÊN TRÁI
+       ========================================== */
     [data-testid="stVerticalBlockBorderWrapper"] { 
         background: #ffffff; 
-        border-radius: 12px; 
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border-radius: 8px; 
         border: 1px solid #e2e8f0;
+        border-left: 5px solid #3b82f6; /* Vạch xanh phân cách cực đẹp */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         padding: 1.2rem; 
-        margin-bottom: 1rem;
+        margin-bottom: 1.2rem; /* Tăng khoảng cách giữa các thẻ */
     }
 
     /* Tabs */
@@ -43,14 +46,14 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] { background-color: transparent; border-radius: 8px; color: #94a3b8; font-weight: 600; font-size: 1.15rem !important; padding: 10px 24px; border: none; }
     .stTabs [aria-selected="true"] { background-color: #3b82f6 !important; color: white !important; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
 
-    /* CSS CHO NÚT BẤM HTML (CÓ VIỀN) */
+    /* Nút Tải Về (HTML) */
     .action-btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        background-color: #ffffff;
-        color: #334155 !important;
-        border: 1.5px solid #cbd5e1;
+        background-color: #eff6ff;
+        color: #2563eb !important;
+        border: 1.5px solid #bfdbfe;
         border-radius: 8px;
         font-weight: 600;
         font-size: 0.9rem;
@@ -62,18 +65,29 @@ st.markdown("""
         box-sizing: border-box;
     }
     .action-btn:hover {
-        background-color: #f8fafc;
-        border-color: #94a3b8;
-        color: #0f172a !important;
-    }
-    .action-btn-blue {
-        background-color: #eff6ff;
-        color: #2563eb !important;
-        border-color: #bfdbfe;
-    }
-    .action-btn-blue:hover {
         background-color: #dbeafe;
         border-color: #93c5fd;
+        color: #1e40af !important;
+    }
+
+    /* Xóa nền trắng của Checkbox và căn giữa */
+    div[data-testid="stCheckbox"] { 
+        margin: 0 !important; 
+        padding: 0 !important; 
+        background: transparent !important; 
+        display: flex;
+        align-items: center;
+        height: 100%;
+    }
+    div[data-testid="stCheckbox"] label {
+        background: transparent !important;
+        padding: 0 !important;
+    }
+    div[data-testid="stCheckbox"] label p {
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        color: #334155 !important;
+        white-space: nowrap !important;
     }
 
     /* Header */
@@ -92,7 +106,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# THANH CHỌN NGÔN NGỮ GỌN GÀNG (Đưa lên góc phải)
+# THANH CHỌN NGÔN NGỮ GỌN GÀNG
 col_space, col_lang = st.columns([7, 3])
 with col_lang:
     render_language_selector()
@@ -118,7 +132,7 @@ def load_docs_in(cat_id):
     return [(d.id, d.to_dict()) for d in docs]
 
 # ==========================================
-# HÀM HIỂN THỊ TÀI LIỆU (ĐÃ FIX HOÀN TOÀN)
+# HÀM HIỂN THỊ TÀI LIỆU
 # ==========================================
 def render_docs(cat_id):
     docs = load_docs_in(cat_id)
@@ -143,14 +157,13 @@ def render_docs(cat_id):
             with col_btn_dl:
                 # Nút Tải Về (HTML)
                 st.markdown(
-                    f'<a href="{d.get("file_url","#")}" target="_blank" class="action-btn action-btn-blue">📥 {t("btn_download")}</a>',
+                    f'<a href="{d.get("file_url","#")}" target="_blank" class="action-btn">📥 {t("btn_download")}</a>',
                     unsafe_allow_html=True
                 )
                 
             with col_btn_prev:
-                # Sử dụng st.checkbox nhưng ẩn label đi, dùng CSS của chúng ta để hiển thị
-                # Đặt label cho checkbox là "Xem trước", nhưng sẽ bị ẩn đi nhờ CSS bên dưới
-                show_preview = st.checkbox(f"👁️ {t('view_preview')}", key=f"chk_preview_{doc_id}")
+                # SỬA LỖI 2 CON MẮT: Bỏ emoji ở đây vì trong translations.py đã có
+                show_preview = st.checkbox(t('view_preview'), key=f"chk_preview_{doc_id}")
             
             # NẾU CHỌN XEM TRƯỚC
             if show_preview:
