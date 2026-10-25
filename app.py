@@ -1,4 +1,4 @@
-"""Cổng công dân – Giao diện hiện đại, tối ưu cho cả điện thoại và máy tính."""
+"""Cổng công dân – Giao diện Dark Mode, Premium UI."""
 import os
 import tempfile
 import streamlit as st
@@ -7,113 +7,154 @@ from utils.firebase_client import get_db
 from utils.face_utils import extract_embedding, decrypt_embedding, cosine_similarity
 from utils.constants import MATCH_THRESHOLD
 
-# Cấu hình trang Web rộng rãi
-st.set_page_config(page_title="Cổng Công dân", page_icon="🌐", layout="wide")
+# Cấu hình trang
+st.set_page_config(page_title="Cổng Công dân", page_icon="🛡️", layout="wide")
 
 # ==========================================================
-# CSS TÙY CHỈNH SIÊU ĐẸP CHO TRANG NGƯỜI DÂN
+# CSS TÙY CHỈNH: GIAO DIỆN DARK MODE & HIỆU ỨNG GLOW
 # ==========================================================
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     
-    html, body, [class*="css"] {
-        font-family: 'Inter', sans-serif;
-    }
-
-    /* 1. Nền Gradient nhẹ nhàng cho toàn bộ trang */
+    /* 1. Cấu hình nền tối toàn trang */
     [data-testid="stAppViewContainer"] {
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        background-color: #0f172a;
+        background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+        font-family: 'Inter', sans-serif;
     }
     header {visibility: hidden;}
     footer {visibility: hidden;}
 
-    /* 2. Giới hạn chiều rộng nội dung để không bị văng xa trên màn hình to */
+    /* 2. Giới hạn nội dung */
     .block-container {
-        max-width: 1000px !important;
-        padding-top: 3rem !important;
-        padding-bottom: 3rem !important;
+        max-width: 900px !important;
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
     }
 
-    /* 3. Tiêu đề với hiệu ứng Gradient Text */
-    .main-title {
+    /* 3. Hero Header (Dải màu tối) */
+    .hero-section {
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        padding: 40px 20px;
+        border-radius: 20px;
         text-align: center;
-        font-size: 2.8rem;
+        box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+        border: 1px solid #334155;
+        margin-bottom: 2rem;
+    }
+    .hero-title {
+        font-size: 2.5rem;
         font-weight: 800;
-        background: -webkit-linear-gradient(45deg, #1e3a8a, #3b82f6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 0;
+        color: #ffffff;
+        margin-bottom: 0.5rem;
+        letter-spacing: -1px;
     }
-    .sub-title {
-        text-align: center;
-        color: #64748b;
+    .hero-subtitle {
         font-size: 1.1rem;
-        margin-bottom: 2.5rem;
+        color: #94a3b8;
     }
 
-    /* 4. Làm đẹp thanh Tabs */
+    /* 4. Thẻ nội dung chính (White Card) */
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+        border: none;
+        padding: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    /* 5. Tùy chỉnh Tabs (Nút bấm) */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 2rem;
+        gap: 10px;
+        background-color: #1e293b;
+        padding: 8px;
+        border-radius: 12px;
         justify-content: center;
-        background-color: transparent;
     }
     .stTabs [data-baseweb="tab"] {
-        height: 50px;
         background-color: transparent;
         border-radius: 8px;
+        color: #94a3b8;
         font-weight: 600;
-        color: #64748b;
+        padding: 10px 20px;
+        border: none;
     }
     .stTabs [aria-selected="true"] {
-        color: #2563eb !important;
-        border-bottom: 3px solid #2563eb !important;
+        background-color: #3b82f6 !important;
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
     }
 
-    /* 5. Làm đẹp Khung (Container) thành dạng Thẻ kính mờ */
-    [data-testid="stVerticalBlockBorderWrapper"] {
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(10px);
-        border-radius: 16px;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        padding: 1.5rem;
-    }
-
-    /* 6. Nút bấm Tra Cứu */
+    /* 6. Nút bấm Tra cứu (Glow Button) */
     .stButton > button {
-        background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+        width: 100%;
+        background: linear-gradient(90deg, #3b82f6, #2563eb) !important;
         color: white !important;
         border: none !important;
-        border-radius: 10px !important;
-        padding: 0.75rem 1rem !important;
-        font-weight: 700 !important;
+        border-radius: 12px !important;
+        padding: 1rem !important;
         font-size: 1.1rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase;
+        letter-spacing: 1px;
         transition: all 0.3s ease !important;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.5) !important;
     }
     .stButton > button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4) !important;
+        transform: translateY(-3px) !important;
+        box-shadow: 0 0 25px rgba(59, 130, 246, 0.8) !important;
     }
 
-    /* 7. Khung Camera */
-    [data-testid="stCameraInput"] video {
+    /* 7. Tùy chỉnh khung Upload & Camera */
+    [data-testid="stFileUploadDropzone"], [data-testid="stCameraInput"] {
+        background-color: #f8fafc;
         border-radius: 12px;
         border: 2px dashed #cbd5e1;
+        padding: 1.5rem;
     }
-
-    /* 8. Thẻ Kết quả */
+    
+    /* 8. Custom Result Card (Hiển thị kết quả) */
     .result-card {
-        background: white;
+        background: #ffffff;
         border-radius: 16px;
-        padding: 24px;
-        border-left: 6px solid #10b981;
-        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-top: 20px;
+        box-shadow: 0 20px 40px -10px rgba(0,0,0,0.2);
+    }
+    .result-success {
+        border-left: 8px solid #10b981;
+    }
+    .result-error {
+        border-left: 8px solid #ef4444;
+    }
+    .result-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 15px;
+    }
+    .result-data {
+        font-size: 1.1rem;
+        color: #334155;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 10px;
+    }
+    .phone-alert {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 12px;
+        padding: 20px;
         margin-top: 20px;
     }
-    .result-card.error {
-        border-left-color: #ef4444;
+    .phone-number {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #dc2626;
+        display: block;
+        margin-top: 5px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -121,11 +162,17 @@ st.markdown("""
 db = get_db()
 FERNET_KEY = st.secrets["fernet_key"]
 
-# Header
-st.markdown('<h1 class="main-title">🌐 CỔNG THÔNG TIN CÔNG DÂN</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-title">Tra cứu thông tin và xem nội dung tuyên truyền</p>', unsafe_allow_html=True)
+# ==========================================
+# HEADER ĐẸP MẮT (Dùng HTML)
+# ==========================================
+st.markdown("""
+<div class="hero-section">
+    <div class="hero-title">🛡️ CỔNG THÔNG TIN CÔNG DÂN</div>
+    <div class="hero-subtitle">Hệ thống tra cứu thông tin và tuyên truyền phòng chống tội phạm</div>
+</div>
+""", unsafe_allow_html=True)
 
-# Load data (cache)
+# Load data
 @st.cache_data(ttl=60)
 def load_categories():
     docs = list(db.collection("danh_muc").stream())
@@ -180,7 +227,7 @@ with tab_a:
 # TAB B: TRA CỨU KHUÔN MẶT
 # ============================================================
 with tab_b:
-    st.markdown("<h3 style='color: #0f172a; text-align: center; margin-bottom: 1rem;'>Tra cứu thông tin qua khuôn mặt</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #0f172a; text-align: center;'>Tra cứu thông tin qua khuôn mặt</h3>", unsafe_allow_html=True)
     st.caption("Vui lòng cung cấp ảnh chân dung rõ mặt để hệ thống đối chiếu với cơ sở dữ liệu.")
 
     with st.container(border=True):
@@ -188,13 +235,11 @@ with tab_b:
         
         photo = None
         
-        # Cách 1: Chụp ảnh
         with sub_tab1:
             photo_cam = st.camera_input("Nhấn vào đây để bật Camera", key="cam_photo", label_visibility="collapsed")
             if photo_cam is not None:
                 photo = photo_cam
                 
-        # Cách 2: Tải ảnh lên
         with sub_tab2:
             photo_upload = st.file_uploader(
                 "Chọn ảnh (jpg/png)", 
@@ -205,10 +250,9 @@ with tab_b:
             if photo_upload is not None:
                 photo = photo_upload
 
-    # Nếu đã có ảnh thì hiển thị nút Tra cứu
     if photo:
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("🔍 BẮT ĐẦU TRA CỨU", use_container_width=True):
+        if st.button("🔍 BẮT ĐẦU TRA CỨU"):
             with st.spinner("Hệ thống đang phân tích khuôn mặt..."):
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
                     tmp.write(photo.read())
@@ -230,43 +274,41 @@ with tab_b:
                             best_doc = data
 
                     if best_doc and best_score >= MATCH_THRESHOLD:
-                        # HIỂN THỊ KẾT QUẢ ĐẸP MẮT
+                        # ===== KẾT QUẢ ĐẸP BẰNG HTML =====
                         st.markdown(f"""
-                        <div class="result-card">
-                            <h3>✅ Tìm thấy thông tin trùng khớp</h3>
-                            <p><b>Độ tin cậy:</b> <span style="color:#10b981; font-weight:bold;">{best_score:.2%}</span></p>
-                            <hr style="margin: 15px 0; border: none; border-top: 1px solid #e2e8f0;">
-                            <p><b>Họ tên:</b> {best_doc.get('ho_ten','')}</p>
-                            <p><b>Quốc tịch:</b> {best_doc.get('quoc_tich','')}</p>
-                            <p><b>Số hộ chiếu:</b> <code>{best_doc.get('so_ho_chieu','')}</code></p>
+                        <div class="result-card result-success">
+                            <div class="result-title">✅ Tìm thấy thông tin trùng khớp</div>
+                            <div style="color: #64748b; margin-bottom: 15px;">Độ tin cậy: <b>{best_score:.2%}</b></div>
+                            
+                            <div class="result-data"><b>Họ tên:</b> {best_doc.get('ho_ten','')}</div>
+                            <div class="result-data"><b>Quốc tịch:</b> {best_doc.get('quoc_tich','')}</div>
+                            <div class="result-data"><b>Số hộ chiếu:</b> <code>{best_doc.get('so_ho_chieu','')}</code></div>
                         </div>
                         """, unsafe_allow_html=True)
 
                         if best_doc.get("anh_url"):
                             st.image(best_doc["anh_url"], width=150, caption="Ảnh đối tượng")
 
-                        st.divider()
-                        st.error("📞 **ĐƯỜNG DÂY NÓNG PHẢN ÁNH / HỖ TRỢ**")
+                        # Hiển thị số điện thoại
                         contact = db.collection("cau_hinh").document("lien_he").get()
                         if contact.exists:
                             items = contact.to_dict().get("danh_sach", [])
                             if items:
                                 for it in items:
                                     st.markdown(
-                                        f"<div style='background:#fee2e2; padding:12px; border-radius:8px; margin-bottom:8px;'>"
-                                        f"<b>{it['ten']}</b> — <span style='font-size:1.2rem; color:#dc2626; font-weight:bold;'>{it['so_dien_thoai']}</span><br>"
-                                        f"<i>{it.get('mo_ta','')}</i></div>",
+                                        f"""<div class="phone-alert">
+                                            <div style="color: #7f1d1d; font-weight: 600;">📞 Đường dây nóng: {it['ten']}</div>
+                                            <span class="phone-number">{it['so_dien_thoai']}</span>
+                                            <div style="color: #b91c1c; font-size: 0.9rem;">{it.get('mo_ta','')}</div>
+                                        </div>""",
                                         unsafe_allow_html=True
                                     )
-                            else:
-                                st.info("Chưa có số điện thoại được cấu hình.")
-                        else:
-                            st.info("Chưa có số điện thoại được cấu hình.")
                     else:
+                        # ===== KẾT QUẢ LỖI BẰNG HTML =====
                         st.markdown("""
-                        <div class="result-card error">
-                            <h3>❌ Không tìm thấy thông tin</h3>
-                            <p>Hình ảnh của bạn không trùng khớp với bất kỳ dữ liệu nào trên hệ thống.</p>
+                        <div class="result-card result-error">
+                            <div class="result-title" style="color: #dc2626;">❌ Không tìm thấy thông tin</div>
+                            <p style="color: #64748b;">Hình ảnh của bạn không trùng khớp với bất kỳ dữ liệu nào trên hệ thống.</p>
                         </div>
                         """, unsafe_allow_html=True)
                 except Exception as e:
