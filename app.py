@@ -1,4 +1,4 @@
-"""Cổng công dân – Giao diện Dark Mode, Bố cục ngang hiện đại."""
+"""Cổng công dân – Giao diện Dark Mode, Bố cục HTML/CSS hiện đại."""
 import os
 import tempfile
 import streamlit as st
@@ -21,7 +21,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 2. CSS GIAO DIỆN XỊN XÒ
+# 2. CSS TOÀN CỤC (FLEXBOX & GLASSMORPHISM)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -37,11 +37,11 @@ st.markdown("""
     /* Khung chứa tài liệu */
     [data-testid="stVerticalBlockBorderWrapper"] { 
         background: #ffffff; 
-        border-radius: 10px; 
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        border-radius: 12px; 
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         border: 1px solid #e2e8f0;
-        padding: 0.75rem 1.25rem; 
-        margin-bottom: 0.5rem;
+        padding: 1rem 1.2rem; 
+        margin-bottom: 0.8rem;
     }
 
     /* Tabs */
@@ -49,34 +49,53 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] { background-color: transparent; border-radius: 8px; color: #94a3b8; font-weight: 600; font-size: 1.15rem !important; padding: 10px 24px; border: none; }
     .stTabs [aria-selected="true"] { background-color: #3b82f6 !important; color: white !important; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
 
-    /* NÚT TẢI VỀ NHỎ GỌN (PILL BUTTON) */
-    .stLinkButton > a {
-        background-color: #3b82f6 !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 20px !important; /* Bo tròn hình viên thuốc */
-        font-weight: 600 !important;
-        font-size: 0.85rem !important;
-        padding: 0.3rem 0.8rem !important;
-        text-decoration: none !important;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        white-space: nowrap !important;
-        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3) !important;
-        transition: all 0.2s ease;
+    /* XÓA NỀN TRẮNG CỦA CHECKBOX */
+    div[data-testid="stCheckbox"] { 
+        margin: 0 !important; 
+        padding: 0 !important; 
+        background: transparent !important; 
     }
-    .stLinkButton > a:hover { background-color: #2563eb !important; transform: scale(1.05); }
-    
-    /* Ô TÍCH XEM TRƯỚC KHÔNG BỊ NỀN TRẮNG BAO QUANH */
-    div[data-testid="stCheckbox"] { margin-bottom: 0 !important; background: transparent !important; padding: 0 !important; }
-    div[data-testid="stCheckbox"] label { background: transparent !important; padding: 0 !important; }
+    div[data-testid="stCheckbox"] label {
+        background: transparent !important;
+        padding: 0 !important;
+        display: flex;
+        align-items: center;
+    }
     div[data-testid="stCheckbox"] label p {
-        font-size: 0.9rem !important;
+        font-size: 0.95rem !important;
         font-weight: 600 !important;
         color: #334155 !important;
         white-space: nowrap !important;
+        margin-left: 5px !important;
     }
+
+    /* NÚT TẢI VỀ (DÙNG HTML THUẦN) */
+    .custom-download-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #3b82f6;
+        color: #ffffff !important;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 0.4rem 1rem;
+        text-decoration: none !important;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+        transition: all 0.2s ease;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .custom-download-btn:hover {
+        background-color: #2563eb;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(59, 130, 246, 0.4);
+    }
+
+    /* Header */
+    .hero-section { background: linear-gradient(135deg, #1e293b, #0f172a); padding: 30px 20px; border-radius: 16px; text-align: center; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5); border: 1px solid #334155; margin-bottom: 1.5rem; }
+    .hero-title { font-size: clamp(1.4rem, 2.5vw, 2rem); font-weight: 800; color: #ffffff; margin-bottom: 0.5rem; line-height: 1.2; }
+    .hero-subtitle { font-size: clamp(0.8rem, 1.5vw, 1rem); color: #94a3b8; }
 
     /* Kết quả tra cứu */
     .result-card { background: #ffffff; border-radius: 16px; padding: 25px; margin-top: 20px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.2); }
@@ -86,18 +105,14 @@ st.markdown("""
     .result-data { font-size: 1.2rem; color: #334155; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
     .phone-alert { background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 20px; margin-top: 20px; }
     .phone-number { font-size: 2.2rem; font-weight: 800; color: #dc2626; display: block; margin-top: 5px; }
-    
-    /* Header */
-    .hero-section { background: linear-gradient(135deg, #1e293b, #0f172a); padding: 30px 20px; border-radius: 16px; text-align: center; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5); border: 1px solid #334155; margin-bottom: 1.5rem; }
-    .hero-title { font-size: clamp(1.4rem, 2.5vw, 2rem); font-weight: 800; color: #ffffff; margin-bottom: 0.5rem; line-height: 1.2; }
-    .hero-subtitle { font-size: clamp(0.8rem, 1.5vw, 1rem); color: #94a3b8; }
 </style>
 """, unsafe_allow_html=True)
 
-# THANH CHỌN NGÔN NGỮ (Đưa lên góc trên, gọn gàng)
+# THANH NGÔN NGỮ (Đặt trong khung nhỏ, gọn gàng)
 col_space, col_lang = st.columns([7, 3])
 with col_lang:
     with st.container(border=True):
+        st.markdown("<div style='font-size:0.8rem; color:#64748b; font-weight:600; margin-bottom:5px;'>🌐 Language / Ngôn ngữ</div>", unsafe_allow_html=True)
         render_language_selector()
 
 db = get_db()
@@ -121,7 +136,7 @@ def load_docs_in(cat_id):
     return [(d.id, d.to_dict()) for d in docs]
 
 # ==========================================
-# HÀM HIỂN THỊ TÀI LIỆU (XẾP NGANG HOÀN HẢO)
+# HÀM HIỂN THỊ TÀI LIỆU (DÙNG HTML CHO NÚT TẢI)
 # ==========================================
 def render_docs(cat_id):
     docs = load_docs_in(cat_id)
@@ -130,7 +145,7 @@ def render_docs(cat_id):
         return
     for doc_id, d in docs:
         with st.container(border=True):
-            # Chia làm 3 cột: Tên file (chiếm nhiều nhất) - Nút Tải - Checkbox
+            # Cột: Tên file (5) | Nút tải (2) | Checkbox (3)
             col_name, col_btn, col_chk = st.columns([5, 2, 3], vertical_alignment="center")
             
             with col_name:
@@ -143,17 +158,21 @@ def render_docs(cat_id):
                 )
             
             with col_btn:
-                # Nút bấm đã được CSS thu nhỏ thành hình viên thuốc
-                st.link_button("📥 " + t('btn_download'), d.get('file_url','#'), use_container_width=True)
+                # NÚT TẢI VỀ BẰNG HTML THUẦN (Không bao giờ bị méo)
+                file_url = d.get('file_url','#')
+                st.markdown(
+                    f'<a href="{file_url}" target="_blank" class="custom-download-btn">📥 {t("btn_download")}</a>',
+                    unsafe_allow_html=True
+                )
             
             with col_chk:
-                # Checkbox đã được CSS xóa nền trắng
-                show_preview = st.checkbox("👁️ " + t('view_preview'), key=f"chk_preview_{doc_id}")
+                # Checkbox đã được CSS reset
+                show_preview = st.checkbox(f"👁️ {t('view_preview')}", key=f"chk_preview_{doc_id}")
             
+            # NẾU CHỌN XEM TRƯỚC
             if show_preview:
-                st.markdown("<hr style='margin: 10px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
+                st.markdown("<hr style='margin: 15px 0 10px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
                 file_type = d.get('file_type', '').lower()
-                file_url = d.get('file_url', '')
                 
                 if file_type == 'pdf':
                     components.iframe(file_url, height=500, scrolling=True)
@@ -187,7 +206,6 @@ with tab_a:
                 render_docs(child_id)
 
 with tab_b:
-    # ... (Phần Tra cứu giữ nguyên) ...
     st.markdown(f"<h3 style='color: #0f172a; text-align: center;'>{t('search_h')}</h3>", unsafe_allow_html=True)
     st.caption(t('search_desc'))
 
