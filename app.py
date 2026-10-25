@@ -1,4 +1,4 @@
-"""Cổng công dân – Giao diện hiện đại, thân thiện."""
+"""Cổng công dân – Giao diện hiện đại, tối ưu cho cả điện thoại và máy tính."""
 import os
 import tempfile
 import streamlit as st
@@ -6,21 +6,124 @@ import streamlit as st
 from utils.firebase_client import get_db
 from utils.face_utils import extract_embedding, decrypt_embedding, cosine_similarity
 from utils.constants import MATCH_THRESHOLD
-from utils.ui_utils import apply_custom_css
 
-st.set_page_config(page_title="Cổng Công dân", page_icon="🌐", layout="centered")
-apply_custom_css()
+# Cấu hình trang Web rộng rãi
+st.set_page_config(page_title="Cổng Công dân", page_icon="🌐", layout="wide")
+
+# ==========================================================
+# CSS TÙY CHỈNH SIÊU ĐẸP CHO TRANG NGƯỜI DÂN
+# ==========================================================
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* 1. Nền Gradient nhẹ nhàng cho toàn bộ trang */
+    [data-testid="stAppViewContainer"] {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    }
+    header {visibility: hidden;}
+    footer {visibility: hidden;}
+
+    /* 2. Giới hạn chiều rộng nội dung để không bị văng xa trên màn hình to */
+    .block-container {
+        max-width: 1000px !important;
+        padding-top: 3rem !important;
+        padding-bottom: 3rem !important;
+    }
+
+    /* 3. Tiêu đề với hiệu ứng Gradient Text */
+    .main-title {
+        text-align: center;
+        font-size: 2.8rem;
+        font-weight: 800;
+        background: -webkit-linear-gradient(45deg, #1e3a8a, #3b82f6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0;
+    }
+    .sub-title {
+        text-align: center;
+        color: #64748b;
+        font-size: 1.1rem;
+        margin-bottom: 2.5rem;
+    }
+
+    /* 4. Làm đẹp thanh Tabs */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 2rem;
+        justify-content: center;
+        background-color: transparent;
+    }
+    .stTabs [data-baseweb="tab"] {
+        height: 50px;
+        background-color: transparent;
+        border-radius: 8px;
+        font-weight: 600;
+        color: #64748b;
+    }
+    .stTabs [aria-selected="true"] {
+        color: #2563eb !important;
+        border-bottom: 3px solid #2563eb !important;
+    }
+
+    /* 5. Làm đẹp Khung (Container) thành dạng Thẻ kính mờ */
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        padding: 1.5rem;
+    }
+
+    /* 6. Nút bấm Tra Cứu */
+    .stButton > button {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 10px !important;
+        padding: 0.75rem 1rem !important;
+        font-weight: 700 !important;
+        font-size: 1.1rem !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
+    }
+    .stButton > button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4) !important;
+    }
+
+    /* 7. Khung Camera */
+    [data-testid="stCameraInput"] video {
+        border-radius: 12px;
+        border: 2px dashed #cbd5e1;
+    }
+
+    /* 8. Thẻ Kết quả */
+    .result-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        border-left: 6px solid #10b981;
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        margin-top: 20px;
+    }
+    .result-card.error {
+        border-left-color: #ef4444;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 db = get_db()
 FERNET_KEY = st.secrets["fernet_key"]
 
 # Header
-st.markdown("""
-<div style="text-align: center; padding: 20px 0;">
-    <h1 style="color: #1e3a8a; font-weight: 800; margin-bottom: 5px;">🌐 CỔNG THÔNG TIN CÔNG DÂN</h1>
-    <p style="color: #64748b; font-size: 1.1rem;">Tra cứu thông tin và xem nội dung tuyên truyền</p>
-</div>
-""", unsafe_allow_html=True)
+st.markdown('<h1 class="main-title">🌐 CỔNG THÔNG TIN CÔNG DÂN</h1>', unsafe_allow_html=True)
+st.markdown('<p class="sub-title">Tra cứu thông tin và xem nội dung tuyên truyền</p>', unsafe_allow_html=True)
 
 # Load data (cache)
 @st.cache_data(ttl=60)
@@ -74,37 +177,38 @@ with tab_a:
                 render_docs(child_id)
 
 # ============================================================
-# TAB B: TRA CỨU KHUÔN MẶT (CÓ 2 LỰA CHỌN: CHỤP HOẶC TẢI LÊN)
+# TAB B: TRA CỨU KHUÔN MẶT
 # ============================================================
 with tab_b:
-    st.markdown("<h3 style='color: #0f172a; text-align: center;'>Tra cứu thông tin qua khuôn mặt</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #0f172a; text-align: center; margin-bottom: 1rem;'>Tra cứu thông tin qua khuôn mặt</h3>", unsafe_allow_html=True)
     st.caption("Vui lòng cung cấp ảnh chân dung rõ mặt để hệ thống đối chiếu với cơ sở dữ liệu.")
 
-    # Tạo 2 tab nhỏ để người dùng chọn cách tải ảnh
-    sub_tab1, sub_tab2 = st.tabs(["📸 Chụp ảnh trực tiếp", "📂 Tải ảnh từ thiết bị"])
-    
-    photo = None
-    
-    # Cách 1: Chụp ảnh (hiển thị trên điện thoại hoặc webcam máy tính)
-    with sub_tab1:
-        photo_cam = st.camera_input("Nhấn vào đây để bật Camera", key="cam_photo")
-        if photo_cam is not None:
-            photo = photo_cam
-            
-    # Cách 2: Tải ảnh lên từ thư viện
-    with sub_tab2:
-        photo_upload = st.file_uploader(
-            "Chọn ảnh (jpg/png)", 
-            type=["jpg", "jpeg", "png"], 
-            key="upload_photo"
-        )
-        if photo_upload is not None:
-            photo = photo_upload
+    with st.container(border=True):
+        sub_tab1, sub_tab2 = st.tabs(["📸 Chụp ảnh trực tiếp", "📂 Tải ảnh từ thiết bị"])
+        
+        photo = None
+        
+        # Cách 1: Chụp ảnh
+        with sub_tab1:
+            photo_cam = st.camera_input("Nhấn vào đây để bật Camera", key="cam_photo", label_visibility="collapsed")
+            if photo_cam is not None:
+                photo = photo_cam
+                
+        # Cách 2: Tải ảnh lên
+        with sub_tab2:
+            photo_upload = st.file_uploader(
+                "Chọn ảnh (jpg/png)", 
+                type=["jpg", "jpeg", "png"], 
+                key="upload_photo",
+                label_visibility="collapsed"
+            )
+            if photo_upload is not None:
+                photo = photo_upload
 
-    # Nếu đã có ảnh (từ 1 trong 2 tab) thì hiển thị nút Tra cứu
+    # Nếu đã có ảnh thì hiển thị nút Tra cứu
     if photo:
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("🔍 BẮT ĐẦU TRA CỨU", type="primary", use_container_width=True):
+        if st.button("🔍 BẮT ĐẦU TRA CỨU", use_container_width=True):
             with st.spinner("Hệ thống đang phân tích khuôn mặt..."):
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
                     tmp.write(photo.read())
@@ -149,7 +253,7 @@ with tab_b:
                             if items:
                                 for it in items:
                                     st.markdown(
-                                        f"<div style='background:#fee2e2; padding:10px; border-radius:8px; margin-bottom:5px;'>"
+                                        f"<div style='background:#fee2e2; padding:12px; border-radius:8px; margin-bottom:8px;'>"
                                         f"<b>{it['ten']}</b> — <span style='font-size:1.2rem; color:#dc2626; font-weight:bold;'>{it['so_dien_thoai']}</span><br>"
                                         f"<i>{it.get('mo_ta','')}</i></div>",
                                         unsafe_allow_html=True
