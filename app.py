@@ -1,4 +1,4 @@
-"""Cổng công dân – Giao diện Dark Mode, Chuẩn Font, Bố cục hoàn thiện."""
+"""Cổng công dân – Giao diện Dark Mode, Bố cục ngang hiện đại."""
 import os
 import tempfile
 import streamlit as st
@@ -21,7 +21,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 2. CSS GIAO DIỆN (ĐÃ FIX LỖI TRÀN KHUNG & RỚT DÒNG)
+# 2. CSS GIAO DIỆN XỊN XÒ
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -34,48 +34,48 @@ st.markdown("""
     }
     .block-container { max-width: 900px !important; padding-top: 2rem !important; }
 
-    /* Khung chứa tài liệu - Thiết kế lại toàn bộ */
+    /* Khung chứa tài liệu */
     [data-testid="stVerticalBlockBorderWrapper"] { 
         background: #ffffff; 
-        border-radius: 12px; 
+        border-radius: 10px; 
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         border: 1px solid #e2e8f0;
-        padding: 1.2rem; 
-        margin-bottom: 1rem;
-        transition: all 0.2s ease;
-    }
-    [data-testid="stVerticalBlockBorderWrapper"]:hover {
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        border-color: #cbd5e1;
+        padding: 0.75rem 1.25rem; 
+        margin-bottom: 0.5rem;
     }
 
-    /* Tabs to rõ ràng */
+    /* Tabs */
     .stTabs [data-baseweb="tab-list"] { gap: 10px; background-color: #1e293b; padding: 8px; border-radius: 12px; justify-content: center; }
     .stTabs [data-baseweb="tab"] { background-color: transparent; border-radius: 8px; color: #94a3b8; font-weight: 600; font-size: 1.15rem !important; padding: 10px 24px; border: none; }
     .stTabs [aria-selected="true"] { background-color: #3b82f6 !important; color: white !important; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
 
-    /* Nút tải về gọn gàng */
+    /* NÚT TẢI VỀ NHỎ GỌN (PILL BUTTON) */
     .stLinkButton > a {
         background-color: #3b82f6 !important;
         color: white !important;
         border: none !important;
-        border-radius: 6px !important;
+        border-radius: 20px !important; /* Bo tròn hình viên thuốc */
         font-weight: 600 !important;
-        font-size: 0.95rem !important;
-        padding: 0.4rem 1rem !important;
+        font-size: 0.85rem !important;
+        padding: 0.3rem 0.8rem !important;
         text-decoration: none !important;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
+        white-space: nowrap !important;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3) !important;
+        transition: all 0.2s ease;
     }
-    .stLinkButton > a:hover { background-color: #2563eb !important; color: white !important; }
+    .stLinkButton > a:hover { background-color: #2563eb !important; transform: scale(1.05); }
     
-    /* Checkbox thu gọn, không rớt dòng */
-    div[data-testid="stCheckbox"] { margin-bottom: 0 !important; }
+    /* Ô TÍCH XEM TRƯỚC KHÔNG BỊ NỀN TRẮNG BAO QUANH */
+    div[data-testid="stCheckbox"] { margin-bottom: 0 !important; background: transparent !important; padding: 0 !important; }
+    div[data-testid="stCheckbox"] label { background: transparent !important; padding: 0 !important; }
     div[data-testid="stCheckbox"] label p {
-        font-size: 0.95rem !important;
+        font-size: 0.9rem !important;
         font-weight: 600 !important;
         color: #334155 !important;
+        white-space: nowrap !important;
     }
 
     /* Kết quả tra cứu */
@@ -88,13 +88,13 @@ st.markdown("""
     .phone-number { font-size: 2.2rem; font-weight: 800; color: #dc2626; display: block; margin-top: 5px; }
     
     /* Header */
-    .hero-section { background: linear-gradient(135deg, #1e293b, #0f172a); padding: 35px 20px; border-radius: 20px; text-align: center; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5); border: 1px solid #334155; margin-bottom: 2rem; }
+    .hero-section { background: linear-gradient(135deg, #1e293b, #0f172a); padding: 30px 20px; border-radius: 16px; text-align: center; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5); border: 1px solid #334155; margin-bottom: 1.5rem; }
     .hero-title { font-size: clamp(1.4rem, 2.5vw, 2rem); font-weight: 800; color: #ffffff; margin-bottom: 0.5rem; line-height: 1.2; }
     .hero-subtitle { font-size: clamp(0.8rem, 1.5vw, 1rem); color: #94a3b8; }
 </style>
 """, unsafe_allow_html=True)
 
-# THANH CHỌN NGÔN NGỮ (FIX LỖI RỚT DÒNG)
+# THANH CHỌN NGÔN NGỮ (Đưa lên góc trên, gọn gàng)
 col_space, col_lang = st.columns([7, 3])
 with col_lang:
     with st.container(border=True):
@@ -121,7 +121,7 @@ def load_docs_in(cat_id):
     return [(d.id, d.to_dict()) for d in docs]
 
 # ==========================================
-# HÀM HIỂN THỊ TÀI LIỆU (THIẾT KẾ LẠI 2 HÀNG)
+# HÀM HIỂN THỊ TÀI LIỆU (XẾP NGANG HOÀN HẢO)
 # ==========================================
 def render_docs(cat_id):
     docs = load_docs_in(cat_id)
@@ -130,25 +130,26 @@ def render_docs(cat_id):
         return
     for doc_id, d in docs:
         with st.container(border=True):
-            # HÀNG 1: TÊN FILE (To, rõ)
-            st.markdown(
-                f"<div style='font-size: 1.15rem; font-weight: 700; color: #1e293b; margin-bottom: 8px;'>"
-                f"📄 {d.get('tieu_de','')} "
-                f"<span style='color:#64748b; font-size:0.9rem; font-weight:500;'>[{d.get('file_type','?').upper()}]</span>"
-                f"</div>", 
-                unsafe_allow_html=True
-            )
+            # Chia làm 3 cột: Tên file (chiếm nhiều nhất) - Nút Tải - Checkbox
+            col_name, col_btn, col_chk = st.columns([5, 2, 3], vertical_alignment="center")
             
-            # HÀNG 2: NÚT TẢI VỀ VÀ CHECKBOX (Nằm ngang, cân đối)
-            col_btn, col_chk = st.columns([1, 3], vertical_alignment="center")
+            with col_name:
+                st.markdown(
+                    f"<div style='font-size: 1.05rem; font-weight: 700; color: #1e293b;'>"
+                    f"📄 {d.get('tieu_de','')} "
+                    f"<span style='color:#64748b; font-size:0.8rem; font-weight:500;'>[{d.get('file_type','?').upper()}]</span>"
+                    f"</div>", 
+                    unsafe_allow_html=True
+                )
             
             with col_btn:
+                # Nút bấm đã được CSS thu nhỏ thành hình viên thuốc
                 st.link_button("📥 " + t('btn_download'), d.get('file_url','#'), use_container_width=True)
             
             with col_chk:
+                # Checkbox đã được CSS xóa nền trắng
                 show_preview = st.checkbox("👁️ " + t('view_preview'), key=f"chk_preview_{doc_id}")
             
-            # NẾU CHỌN XEM TRƯỚC
             if show_preview:
                 st.markdown("<hr style='margin: 10px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
                 file_type = d.get('file_type', '').lower()
@@ -161,7 +162,6 @@ def render_docs(cat_id):
                     components.iframe(iframe_url, height=500, scrolling=True)
                 else:
                     st.text(d.get("noi_dung_text", "")[:5000])
-
 
 tab_a, tab_b = st.tabs([t('tab_prop'), t('tab_search')])
 
@@ -194,11 +194,9 @@ with tab_b:
     with st.container(border=True):
         sub_tab1, sub_tab2 = st.tabs([t('cam_tab'), t('upload_tab')])
         photo = None
-        
         with sub_tab1:
             photo_cam = st.camera_input(t('cam_btn'), key="cam_photo", label_visibility="collapsed")
             if photo_cam is not None: photo = photo_cam
-                
         with sub_tab2:
             photo_upload = st.file_uploader(t('upload_btn'), type=["jpg", "jpeg", "png"], key="upload_photo", label_visibility="collapsed")
             if photo_upload is not None: photo = photo_upload
@@ -212,18 +210,13 @@ with tab_b:
                     tmp_path = tmp.name
                 try:
                     emb = extract_embedding(tmp_path)
-                    best_doc = None
-                    best_score = -1.0
-                    
+                    best_doc, best_score = None, -1.0
                     for doc in db.collection("doi_tuong").stream():
                         data = doc.to_dict()
                         enc = data.get("embedding_encrypted")
                         if not enc: continue
-                        stored = decrypt_embedding(enc, FERNET_KEY)
-                        score = cosine_similarity(emb, stored)
-                        if score > best_score:
-                            best_score = score
-                            best_doc = data
+                        score = cosine_similarity(emb, decrypt_embedding(enc, FERNET_KEY))
+                        if score > best_score: best_score, best_doc = score, data
 
                     if best_doc and best_score >= MATCH_THRESHOLD:
                         st.markdown(f"""
@@ -233,38 +226,16 @@ with tab_b:
                             <div class="result-data"><b>{t('res_name')}</b> {best_doc.get('ho_ten','')}</div>
                             <div class="result-data"><b>{t('res_nation')}</b> {best_doc.get('quoc_tich','')}</div>
                             <div class="result-data"><b>{t('res_pass')}</b> <code>{best_doc.get('so_ho_chieu','')}</code></div>
-                        </div>
-                        """, unsafe_allow_html=True)
-
-                        if best_doc.get("anh_url"):
-                            st.image(best_doc["anh_url"], width=150, caption=t('res_img'))
-
+                        </div>""", unsafe_allow_html=True)
+                        if best_doc.get("anh_url"): st.image(best_doc["anh_url"], width=150, caption=t('res_img'))
                         contact = db.collection("cau_hinh").document("lien_he").get()
-                        if contact.exists:
-                            items = contact.to_dict().get("danh_sach", [])
-                            if items:
-                                for it in items:
-                                    st.markdown(
-                                        f"""<div class="phone-alert">
-                                            <div style="color: #7f1d1d; font-weight: 600; font-size: 1.1rem;">{t('hotline_name')} {it['ten']}</div>
-                                            <span class="phone-number">{it['so_dien_thoai']}</span>
-                                            <div style="color: #b91c1c; font-size: 1rem;">{it.get('mo_ta','')}</div>
-                                        </div>""",
-                                        unsafe_allow_html=True
-                                    )
-                            else:
-                                st.info(t('no_phone'))
-                        else:
-                            st.info(t('no_phone'))
+                        if contact.exists and contact.to_dict().get("danh_sach"):
+                            for it in contact.to_dict().get("danh_sach"):
+                                st.markdown(f"""<div class="phone-alert"><div style="color: #7f1d1d; font-weight: 600; font-size: 1.1rem;">{t('hotline_name')} {it['ten']}</div><span class="phone-number">{it['so_dien_thoai']}</span><div style="color: #b91c1c; font-size: 1rem;">{it.get('mo_ta','')}</div></div>""", unsafe_allow_html=True)
+                        else: st.info(t('no_phone'))
                     else:
-                        st.markdown(f"""
-                        <div class="result-card result-error">
-                            <div class="result-title" style="color: #dc2626;">{t('res_fail')}</div>
-                            <p style="color: #64748b;">{t('res_fail_desc')}</p>
-                        </div>
-                        """, unsafe_allow_html=True)
+                        st.markdown(f"""<div class="result-card result-error"><div class="result-title" style="color: #dc2626;">{t('res_fail')}</div><p style="color: #64748b;">{t('res_fail_desc')}</p></div>""", unsafe_allow_html=True)
                 except Exception as e:
                     st.error(f"{t('err_img')} {e}")
                 finally:
-                    if os.path.exists(tmp_path):
-                        os.unlink(tmp_path)
+                    if os.path.exists(tmp_path): os.unlink(tmp_path)
