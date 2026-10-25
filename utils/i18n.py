@@ -15,40 +15,44 @@ def t(key):
 def render_language_selector():
     init_language()
     
-    # CSS ĐỂ ÉP NHÃN VÀ Ô CHỌN NẰM NGANG, KHÔNG RỚT DÒNG
+    # CSS FIX LỖI CHỮ MỜ BẰNG CÁCH ÉP NỀN TRẮNG VÀ CHỮ ĐEN
     st.markdown("""
     <style>
-        /* Ẩn nhãn mặc định của Streamlit */
-        div[data-testid="stSelectbox"] > label { display: none !important; }
-        
-        /* Làm đẹp ô chọn ngôn ngữ */
-        div[data-testid="stSelectbox"] > div > div {
-            background-color: #ffffff !important;
-            border: 1px solid #cbd5e1 !important;
-            border-radius: 8px !important;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+        /* 1. Sửa phần Nhãn (Language / Ngôn ngữ): Nền trắng, chữ đen đậm */
+        [data-testid="stSidebar"] .stSelectbox label,
+        [data-testid="stSidebar"] .stSelectbox label p,
+        [data-testid="stSidebar"] .stSelectbox [data-testid="stWidgetLabel"] {
+            color: #000000 !important; /* Chữ màu đen tuyền */
+            background-color: #ffffff !important; /* Nền trắng để nổi bật trên sidebar tối */
+            font-weight: 800 !important; /* In đậm */
+            font-size: 1rem !important;
+            padding: 6px 10px !important;
+            border-radius: 6px !important;
+            margin-bottom: 8px !important;
+            display: inline-block !important;
             width: 100% !important;
         }
-        /* Chữ bên trong ô chọn */
-        div[data-testid="stSelectbox"] div[data-baseweb="select"] * {
-            color: #0f172a !important;
+
+        /* 2. Sửa phần Ô chọn (Nền trắng, viền xám) */
+        [data-testid="stSidebar"] div[data-baseweb="select"] > div {
+            background-color: #ffffff !important; 
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 6px !important;
+        }
+        
+        /* 3. Sửa phần chữ bên trong ô chọn thành màu đen đậm */
+        [data-testid="stSidebar"] div[data-baseweb="select"] * {
+            color: #000000 !important; 
             font-weight: 600 !important;
-            font-size: 0.9rem !important;
         }
     </style>
     """, unsafe_allow_html=True)
 
-    # Tạo layout 1 hàng: Icon + Text + Selectbox
-    col1, col2 = st.columns([1, 2], vertical_alignment="center")
-    with col1:
-        st.markdown("<div style='color: #0f172a; font-weight: 600; font-size: 0.95rem; padding-top: 5px;'>🌐 Language</div>", unsafe_allow_html=True)
-    with col2:
-        st.selectbox(
-            "Language",
-            options=list(LANGUAGES.keys()),
-            format_func=lambda x: LANGUAGES[x],
-            key="lang_selector",
-            index=list(LANGUAGES.keys()).index(st.session_state.lang),
-            on_change=change_language,
-            label_visibility="collapsed"
-        )
+    st.selectbox(
+        "🌐 Language / Ngôn ngữ",
+        options=list(LANGUAGES.keys()),
+        format_func=lambda x: LANGUAGES[x],
+        key="lang_selector",
+        index=list(LANGUAGES.keys()).index(st.session_state.lang),
+        on_change=change_language
+    )
