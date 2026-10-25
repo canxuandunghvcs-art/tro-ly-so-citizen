@@ -233,8 +233,8 @@ with tab_b:
                             <div class="result-data"><b>{t('res_pass')}</b> <code>{best_doc.get('so_ho_chieu','')}</code></div>
                         </div>""", unsafe_allow_html=True)
                         
-                        if best_doc.get("anh_url"): 
-                            st.image(best_doc["anh_url"], width=150, caption=t('res_img'))
+                       #if best_doc.get("anh_url"): 
+                            #st.image(best_doc["anh_url"], width=150, caption=t('res_img'))
                         
                         # HIỂN THỊ ĐƯỜNG DÂY NÓNG TỪ FIREBASE
                         contact = db.collection("cau_hinh").document("lien_he").get()
