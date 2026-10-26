@@ -108,7 +108,7 @@ def load_docs_in(cat_id):
     return [(d.id, d.to_dict()) for d in docs]
 
 # ==========================================
-# HÀM HIỂN THỊ TÀI LIỆU
+# HÀM HIỂN THỊ TÀI LIỆU (NÂNG CẤP TOÀN MÀN HÌNH)
 # ==========================================
 def render_docs(cat_id):
     docs = load_docs_in(cat_id)
@@ -126,22 +126,31 @@ def render_docs(cat_id):
                 unsafe_allow_html=True
             )
             
-            col_btn_dl, col_btn_prev = st.columns([1, 1], gap="small")
+            # Chia làm 3 cột: Tải về | Xem toàn màn hình | Checkbox xem trước
+            col_btn_dl, col_btn_full, col_btn_prev = st.columns([1, 1, 1], gap="small")
+            
             with col_btn_dl:
                 st.markdown(f'<a href="{d.get("file_url","#")}" target="_blank" class="action-btn">📥 {t("btn_download")}</a>', unsafe_allow_html=True)
+                
+            with col_btn_full:
+                # Nút mở tab mới (Toàn màn hình) - Màu xanh đậm nổi bật
+                st.markdown(f'<a href="{d.get("file_url","#")}" target="_blank" class="action-btn" style="background-color: #3b82f6; color: white !important; border-color: #2563eb;">🔍 Xem Toàn Màn Hình</a>', unsafe_allow_html=True)
+                
             with col_btn_prev:
                 show_preview = st.checkbox(t('view_preview'), key=f"chk_preview_{doc_id}")
             
+            # NẾU CHỌN XEM TRƯỚC (Hiển thị nhúng trong app)
             if show_preview:
                 st.markdown("<hr style='margin: 15px 0 10px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
                 file_type = d.get('file_type', '').lower()
                 file_url = d.get('file_url', '')
                 
+                # Tăng chiều cao từ 500 lên 800 để dễ nhìn hơn
                 if file_type == 'pdf':
-                    components.iframe(file_url, height=500, scrolling=True)
+                    components.iframe(file_url, height=800, scrolling=True)
                 elif file_type in ['docx', 'doc', 'pptx', 'ppt', 'xlsx', 'xls']:
                     iframe_url = f"https://view.officeapps.live.com/op/embed.aspx?src={file_url}"
-                    components.iframe(iframe_url, height=500, scrolling=True)
+                    components.iframe(iframe_url, height=800, scrolling=True)
                 else:
                     st.text(d.get("noi_dung_text", "")[:5000])
 
