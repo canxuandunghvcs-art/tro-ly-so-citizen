@@ -2,8 +2,10 @@
 import os
 import tempfile
 import time
+import requests
 import streamlit as st
 import streamlit.components.v1 as components
+from cryptography.fernet import Fernet
 
 from utils.firebase_client import get_db
 from utils.face_utils import extract_embedding, decrypt_embedding, cosine_similarity
@@ -29,12 +31,12 @@ st.markdown("""
     }
     .block-container { max-width: 900px !important; padding-top: 2rem !important; }
 
-    /* Khung chứa tài liệu - Tinh tế, có viền xanh nhạt bên trái */
+    /* Khung chứa tài liệu */
     [data-testid="stVerticalBlockBorderWrapper"] { 
         background: #ffffff; 
         border-radius: 8px; 
         border: 1px solid #e2e8f0;
-        border-left: 4px solid #3b82f6; /* Viền xanh phân cách */
+        border-left: 4px solid #3b82f6;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         padding: 1.2rem; 
         margin-bottom: 1.2rem; 
@@ -86,6 +88,7 @@ with col_lang:
 
 db = get_db()
 FERNET_KEY = st.secrets["fernet_key"]
+cipher = Fernet(FERNET_KEY.encode() if isinstance(FERNET_KEY, str) else FERNET_KEY)
 
 st.markdown(f"""
 <div class="hero-section">
@@ -144,9 +147,9 @@ def render_docs(cat_id):
 
 tab_a, tab_b = st.tabs([t('tab_prop'), t('tab_search')])
 
-# ------------------------------------------
+# ==========================================
 # TAB A: NỘI DUNG TUYÊN TRUYỀN
-# ------------------------------------------
+# ==========================================
 with tab_a:
     cats = load_categories()
     cat_dict = {cid: data for cid, data in cats}
@@ -168,9 +171,9 @@ with tab_a:
                 st.markdown(f"&nbsp;&nbsp;&nbsp;↳ **{child['ten']}**", unsafe_allow_html=True)
                 render_docs(child_id)
 
-# ------------------------------------------
-# TAB B: TRA CỨU THÔNG TIN
-# ------------------------------------------
+# ==========================================
+# TAB B: TRA CỨU THÔNG TIN (ĐÃ GIẢI MÃ ẢNH)
+# ==========================================
 with tab_b:
     st.markdown(f"<h3 style='color: #0f172a; text-align: center;'>{t('search_h')}</h3>", unsafe_allow_html=True)
     st.caption(t('search_desc'))
@@ -217,9 +220,6 @@ with tab_b:
                     time_db = time.time() - start_time
                     status.update(label="✅ Phân tích hoàn tất!", state="complete", expanded=False)
                     
-                    # ==========================================
-                    # HIỂN THỊ KẾT QUẢ VÀ CẢNH BÁO SỐ ĐIỆN THOẠI
-                    # ==========================================
                     if best_doc and best_score >= MATCH_THRESHOLD:
                         st.markdown(f"""
                         <div class="result-card result-success">
@@ -233,10 +233,16 @@ with tab_b:
                             <div class="result-data"><b>{t('res_pass')}</b> <code>{best_doc.get('so_ho_chieu','')}</code></div>
                         </div>""", unsafe_allow_html=True)
                         
-                       #if best_doc.get("anh_url"): 
-                            #st.image(best_doc["anh_url"], width=150, caption=t('res_img'))
+                        # GIẢI MÃ VÀ HIỂN THỊ ẢNH
+                        if best_doc.get("anh_url"): 
+                            try:
+                                response = requests.get(best_doc["anh_url"])
+                                if response.status_code == 200:
+                                    decrypted_bytes = cipher.decrypt(response.content)
+                                    st.image(decrypted_bytes, width=150, caption=t('res_img'))
+                            except Exception as e:
+                                st.warning("Không thể giải mã ảnh đối tượng.")
                         
-                        # HIỂN THỊ ĐƯỜNG DÂY NÓNG TỪ FIREBASE
                         contact = db.collection("cau_hinh").document("lien_he").get()
                         if contact.exists and contact.to_dict().get("danh_sach"):
                             for it in contact.to_dict().get("danh_sach"):
